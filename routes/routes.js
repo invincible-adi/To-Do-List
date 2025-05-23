@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { registerUser, loginUser, forgotPassword, resetPassword, changePassword } = require('../controller/userController');
-const { addList, getAllLists, getListById, searchLists, filterLists, updateList, deleteList, getListByUserId } = require('../controller/listController');
+const { addList, getAllLists, getListById, searchLists, filterLists, updateList, deleteList, getListByUserId, getTodos } = require('../controller/listController');
 const verifyToken = require('../middleware/verifytoken');
 // const {  } = require('../controller/listController');
 
@@ -24,5 +24,6 @@ router.delete('/deletelist/:id', verifyToken, deleteList);
 router.get('/getlistbyuserid/:userId', verifyToken, getListByUserId);
 router.get('/searchlists', verifyToken, searchLists);
 router.get('/filterlists', verifyToken, filterLists);
+router.get('/todos', verifyToken, getTodos);
 
 module.exports = router;

@@ -9,16 +9,21 @@ import Dashboard from './components/Dashboard';
 import ResetPassword from './components/ResetPassword';
 import ForgotPassword from './components/ForgotPassword';
 import ChangePassword from './components/ChangePassword'
+import withAuth, { withGuest } from './auth/withAuth';
+
+const LoginWithGuest = withGuest(Login);
+const RegisterWithGuest = withGuest(Register);
+const ForgotPasswordWithGuest = withGuest(ForgotPassword);
 
 function App() {
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<LoginWithGuest />} />
+        <Route path="/register" element={<RegisterWithGuest />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/forgot-password" element={<ForgotPasswordWithGuest />} />
         <Route path="/changepassword" element={<ChangePassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>

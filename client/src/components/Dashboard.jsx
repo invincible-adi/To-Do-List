@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import withAuth from '../auth/withAuth';
 import Swal from 'sweetalert2';
@@ -17,6 +17,10 @@ function Dashboard() {
     const [selectedTask, setSelectedTask] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState("All");
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [searchInput, setSearchInput] = useState("");
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm({
         resolver: yupResolver(taskSchema),
@@ -24,27 +28,42 @@ function Dashboard() {
 
     useEffect(() => {
         fetchTasks();
-    }, []);
+        // eslint-disable-next-line
+    }, [filterStatus, page]);
+
+    useEffect(() => {
+        if (searchTerm !== "") {
+            fetchTasks();
+        }
+        // eslint-disable-next-line
+    }, [searchTerm]);
 
     const fetchTasks = async () => {
         try {
+            setLoading(true);
             const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userid');
-            if (!token || !userId) {
+            if (!token) {
                 Swal.fire({ icon: 'error', title: 'Authentication Error', text: 'User not authenticated' });
                 return;
             }
-
-            const res = await axios.get(`http://localhost:5000/getlistbyuserid/${userId}`, {
+            const params = {
+                searchTerm,
+                status: filterStatus,
+                page,
+                limit: 5
+            };
+            const res = await axios.get('http://localhost:5000/todos', {
                 headers: { Authorization: `Bearer ${token}` },
+                params
             });
-
-            setTasks(Array.isArray(res.data.lists) ? res.data.lists : []);
+            setTasks(res.data.lists);
+            setTotalPages(res.data.totalPages);
         } catch (error) {
             Swal.fire({ icon: 'error', title: 'Error fetching tasks', text: error.response?.data?.message || 'Failed to retrieve tasks' });
+        } finally {
+            setLoading(false);
         }
     };
-
 
     const createTask = async (data) => {
         try {
@@ -93,11 +112,18 @@ function Dashboard() {
         }
     };
 
-    const filteredTasks = tasks.filter(task => {
-        const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) || task.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === "All" || task.status === filterStatus;
-        return matchesSearch && matchesStatus;
-    });
+    // Add a handler for search button
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setSearchTerm(searchInput);
+        setPage(1);
+    };
+
+    // When searchTerm changes, always fetch tasks (even if empty)
+    useEffect(() => {
+        fetchTasks();
+        // eslint-disable-next-line
+    }, [searchTerm]);
 
     return (
         <div className="container-fluid d-flex align-items-center justify-content-center min-vh-100 bg-light">
@@ -122,24 +148,25 @@ function Dashboard() {
                     <button type="submit" className="btn btn-primary w-100">Add Task</button>
                 </form>
 
-                {/* Task List */}
-
                 {/* Search and Filter Controls */}
                 <div className="row mb-3">
                     <div className="col-md-8 mb-2 mb-md-0">
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search by task name or description..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                        />
+                        <form className="d-flex" onSubmit={handleSearch}>
+                            <input
+                                type="text"
+                                className="form-control me-2"
+                                placeholder="Search by task name or description..."
+                                value={searchInput}
+                                onChange={e => setSearchInput(e.target.value)}
+                            />
+                            <button className="btn btn-primary" type="submit">Search</button>
+                        </form>
                     </div>
                     <div className="col-md-4">
                         <select
                             className="form-control"
                             value={filterStatus}
-                            onChange={e => setFilterStatus(e.target.value)}
+                            onChange={e => { setFilterStatus(e.target.value); setPage(1); }}
                         >
                             <option value="All">All</option>
                             <option value="Pending">Pending</option>
@@ -148,10 +175,11 @@ function Dashboard() {
                     </div>
                 </div>
                 <ul className="list-group">
-                    {filteredTasks.length === 0 && (
+                    {loading ? (
+                        <li className="list-group-item text-center">Loading...</li>
+                    ) : tasks.length === 0 ? (
                         <li className="list-group-item text-muted text-center">No tasks found!</li>
-                    )}
-                    {filteredTasks.map((task) => (
+                    ) : tasks.map((task) => (
                         <li key={task._id} className="list-group-item d-flex justify-content-between align-items-center">
                             <span>{task.title} - {task.description}</span>
                             <div>
@@ -161,6 +189,12 @@ function Dashboard() {
                         </li>
                     ))}
                 </ul>
+                {/* Pagination Controls */}
+                <div className="d-flex justify-content-center align-items-center mt-3">
+                    <button className="btn btn-secondary me-2" onClick={() => setPage(page - 1)} disabled={page <= 1}>Prev</button>
+                    <span>Page {page} of {totalPages}</span>
+                    <button className="btn btn-secondary ms-2" onClick={() => setPage(page + 1)} disabled={page >= totalPages}>Next</button>
+                </div>
             </div>
 
             {/* Edit Task Modal */}

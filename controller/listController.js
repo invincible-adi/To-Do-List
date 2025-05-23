@@ -177,6 +177,41 @@ const filterLists = async (req, res) => {
     }
 };
 
+// Unified search, filter, and pagination endpoint
+const getTodos = async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const userId = decoded.id;
+
+    try {
+        const { searchTerm = '', status, sortBy = 'createdAt', sortOrder = 'desc', page = 1, limit = 10 } = req.query;
+        const query = { user: userId };
+        if (status && status !== 'All') query.status = status;
+        if (searchTerm) {
+            query.$or = [
+                { title: { $regex: searchTerm, $options: 'i' } },
+                { description: { $regex: searchTerm, $options: 'i' } }
+            ];
+        }
+        const sort = {};
+        sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const [lists, total] = await Promise.all([
+            List.find(query).sort(sort).skip(skip).limit(parseInt(limit)),
+            List.countDocuments(query)
+        ]);
+        res.status(200).json({
+            lists,
+            total,
+            page: parseInt(page),
+            totalPages: Math.ceil(total / limit),
+            limit: parseInt(limit)
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+
 module.exports = {
     addList,
     getAllLists,
@@ -186,4 +221,5 @@ module.exports = {
     getListByUserId,
     searchLists,
     filterLists,
+    getTodos,
 };

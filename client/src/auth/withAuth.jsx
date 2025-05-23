@@ -11,4 +11,15 @@ const withAuth = (Component) => {
     };
 };
 
+// HOC to redirect authenticated users away from guest-only pages
+export const withGuest = (Component) => {
+    return function GuestOnlyComponent(props) {
+        const token = localStorage.getItem('token');
+        if (token) {
+            return <Navigate to="/dashboard" replace />;
+        }
+        return <Component {...props} />;
+    };
+};
+
 export default withAuth;

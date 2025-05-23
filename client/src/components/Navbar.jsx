@@ -28,9 +28,6 @@ const Navbar = () => {
                 </button>
                 <div className="collapse navbar-collapse fs-5" id="navbarNav">
                     <ul className="navbar-nav ms-auto ">
-                        <li className="nav-item">
-                            <Link className="nav-link me-3" to="/register">Home</Link>
-                        </li>
                         {isAuthenticated ? (
                             <>
                                 <li className="nav-item">
@@ -44,9 +41,14 @@ const Navbar = () => {
                                 </li>
                             </>
                         ) : (
-                            <li className="nav-item">
-                                <Link className="btn btn-primary fs-5" to="/">Login</Link>
-                            </li>
+                            <>
+                                <li className="nav-item">
+                                    <Link className="nav-link me-3" to="/register">Home</Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="btn btn-primary fs-5" to="/">Login</Link>
+                                </li>
+                            </>
                         )}
                     </ul>
                 </div>

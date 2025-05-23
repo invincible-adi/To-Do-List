@@ -8,17 +8,26 @@ const nodemailer = require('nodemailer');
 
 // user registration
 const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, age, dateOfBirth } = req.body;
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
+        }
+        // Auto-generate username from email
+        const username = email.split('@')[0];
+        // Password validation: minimum 8 characters
+        if (!password || password.length < 8) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             name,
             email,
             password: hashedPassword,
+            username,
+            age,
+            dateOfBirth
         });
         await newUser.save();
         res.status(201).json({ message: 'User registered successfully' });

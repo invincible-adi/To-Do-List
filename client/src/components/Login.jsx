@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 // Validation schema with Yup
 const schema = yup.object().shape({
     email: yup.string().email('Invalid email format').required('Email is required'),
-    password: yup.string().min(8, 'Password must be exactly 8 characters').max(8, 'Password must be exactly 8 characters').required('Password is required'),
+    password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
 });
 
 function Login() {

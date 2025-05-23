@@ -8,9 +8,11 @@ import Swal from 'sweetalert2';
 
 // Validation schema with Yup
 const schema = yup.object().shape({
-    name: yup.string().required('UserName is required').max(12),
+    name: yup.string().required('Username is required').max(12),
     email: yup.string().email('Invalid email format').required('Email is required'),
-    password: yup.string().min(8, 'Password must be at least 8 characters').max(8).required('Password is required'),
+    password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
+    age: yup.number().typeError('Age must be a number').required('Age is required').min(1, 'Age must be at least 1'),
+    dateOfBirth: yup.date().typeError('Date of Birth is required').required('Date of Birth is required'),
 });
 
 function Register() {
@@ -43,7 +45,7 @@ function Register() {
                             className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                             type="text"
                             {...register("name")}
-                            placeholder="UserName"
+                            placeholder="Username"
                             required
                         />
                         {errors.name && <p className="text-danger">{errors.name.message}</p>}
@@ -56,7 +58,7 @@ function Register() {
                             placeholder="Email"
                             required
                         />
-                        {errors.email && <div className="texxt-danger">{errors.email.message}</div>}
+                        {errors.email && <div className="text-danger">{errors.email.message}</div>}
                     </div>
                     <div className="mb-3">
                         <input
@@ -67,6 +69,28 @@ function Register() {
                             required
                         />
                         {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
+                    </div>
+                    <div className="mb-3">
+                        <input
+                            className={`form-control ${errors.age ? 'is-invalid' : ''}`}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            {...register("age")}
+                            placeholder="Age"
+                            required
+                        />
+                        {errors.age && <div className="invalid-feedback">{errors.age.message}</div>}
+                    </div>
+                    <div className="mb-3">
+                        <input
+                            className={`form-control ${errors.dateOfBirth ? 'is-invalid' : ''}`}
+                            type="date"
+                            {...register("dateOfBirth")}
+                            placeholder="Date of Birth"
+                            required
+                        />
+                        {errors.dateOfBirth && <div className="invalid-feedback">{errors.dateOfBirth.message}</div>}
                     </div>
                     <button type="submit" className="btn btn-primary w-100">Register</button>
                     <div className="mt-3 text-center">
