@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
+import { FaLock } from 'react-icons/fa';
 
 const schema = yup.object().shape({
     password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
@@ -41,22 +42,27 @@ function ResetPassword() {
     };
 
     return (
-        <div className="container d-flex align-items-center justify-content-center mt-5">
-            <div className="card p-4 shadow-lg" style={{ width: '50%' }}>
+        <div className="container py-4">
+            <div className="card p-4 shadow-lg mx-auto card-gradient blur-background" style={{ maxWidth: 400 }}>
                 <h2 className="mb-4 text-primary text-center">Reset Password</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <input
-                            className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                            type="password"
-                            placeholder="New password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                        />
-                        {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                        <label htmlFor="password" className="form-label dark-theme-label">New Password</label>
+                        <div className="input-group">
+                            <span className="input-group-text"><FaLock /></span>
+                            <input
+                                id="password"
+                                className={`form-control ${errors.password ? 'is-invalid' : ''} dark-theme-input`}
+                                type="password"
+                                placeholder="New password"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
                     </div>
-                    <button type="submit" className="btn btn-primary w-100">Reset Password</button>
+                    <button type="submit" className="btn btn-gradient w-100">Reset Password</button>
                 </form>
                 {success && <div className="alert alert-success mt-3 text-center">{success}</div>}
             </div>

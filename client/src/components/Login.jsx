@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
+import { FaEnvelope, FaLock } from 'react-icons/fa';
 
 // Validation schema with Yup
 const schema = yup.object().shape({
@@ -35,34 +36,46 @@ function Login() {
     };
 
     return (
-        <div className="container d-flex align-items-center justify-content-center mt-5">
-            <div className="card p-4 shadow-lg" style={{ width: '50%' }}>
+        <div className="container py-4">
+            <div className="card p-4 shadow-lg mx-auto card-gradient blur-background" style={{ maxWidth: 400 }}>
                 <h2 className="mb-4 text-primary text-center">Login</h2>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="mb-3">
-                        <input
-                            className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                            type="email"
-                            {...register("email")}
-                            placeholder="Email"
-                            required
-                        />
-                        {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
+                        <label htmlFor="email" className="form-label dark-theme-label">Email address</label>
+                        <div className="input-group">
+                            <span className="input-group-text"><FaEnvelope /></span>
+                            <input
+                                id="email"
+                                className={`form-control ${errors.email ? 'is-invalid' : ''} dark-theme-input`}
+                                type="email"
+                                {...register("email")}
+                                placeholder="Email"
+                                required
+                            />
+                        </div>
+                        {errors.email && <div className="invalid-feedback d-block">{errors.email.message}</div>}
                     </div>
                     <div className="mb-3">
-                        <input
-                            className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                            type="password"
-                            {...register("password")}
-                            placeholder="Password"
-                            required
-                        />
-                        {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
+                        <label htmlFor="password" className="form-label dark-theme-label">Password</label>
+                        <div className="input-group">
+                            <span className="input-group-text"><FaLock /></span>
+                            <input
+                                id="password"
+                                className={`form-control ${errors.password ? 'is-invalid' : ''} dark-theme-input`}
+                                type="password"
+                                {...register("password")}
+                                placeholder="Password"
+                                required
+                            />
+                        </div>
+                        {errors.password && <div className="invalid-feedback d-block">{errors.password.message}</div>}
                     </div>
-                    <button type="submit" className="btn btn-primary w-100">Login</button>
+                    <button type="submit" className="btn btn-gradient w-100">Login</button>
                     <div className="mt-3 d-flex justify-content-between">
-                        <p>Don't have an account? <Link to="/register">Register</Link></p>
-                        <p><Link to="/forgot-password">Forgot Password</Link></p>
+                        <p className="text-center w-100 text-white">Don't have an account? <Link to="/register" className="text-decoration-none" style={{ color: 'var(--dark-primary)' }}>Register</Link></p>
+                    </div>
+                    <div className="text-center mt-2">
+                        <Link to="/forgot-password" className="text-decoration-none dark-theme-text" style={{ color: 'var(--dark-primary)' }}>Forgot Password</Link>
                     </div>
                 </form>
             </div>

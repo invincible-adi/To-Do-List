@@ -1,10 +1,20 @@
 //routes for user
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser, forgotPassword, resetPassword, changePassword } = require('../controller/userController');
+const { registerUser, loginUser, forgotPassword, resetPassword, changePassword, getProfile, updateProfile } = require('../controller/userController');
 const { addList, getAllLists, getListById, searchLists, filterLists, updateList, deleteList, getListByUserId, getTodos } = require('../controller/listController');
 const verifyToken = require('../middleware/verifytoken');
-// const {  } = require('../controller/listController');
+const multer = require('multer');
+const path = require('path');
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, req.user._id + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
 
 // routes for user
 router.post('/register', registerUser);
@@ -25,5 +35,8 @@ router.get('/getlistbyuserid/:userId', verifyToken, getListByUserId);
 router.get('/searchlists', verifyToken, searchLists);
 router.get('/filterlists', verifyToken, filterLists);
 router.get('/todos', verifyToken, getTodos);
+
+router.get('/profile', verifyToken, getProfile);
+router.put('/profile', verifyToken, upload.single('profileImage'), updateProfile);
 
 module.exports = router;

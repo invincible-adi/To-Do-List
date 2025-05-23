@@ -12,7 +12,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <nav className="navbar navbar-expand-lg navbar-gradient">
             <div className="container-fluid">
                 <Link className="navbar-brand text-primary fw-bold fs-3" to="/">To Do List</Link>
                 <button
@@ -34,7 +34,7 @@ const Navbar = () => {
                                     <Link className="nav-link me-3" to={`/dashboard`}>Dashboard</Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className="nav-link me-3" to={`/changepassword`}>Change Password</Link>
+                                    <Link className="nav-link me-3" to={`/profile`}>Profile</Link>
                                 </li>
                                 <li className="nav-item">
                                     <button className="btn btn-danger mt-1" onClick={handleLogout}>Logout</button>
@@ -46,7 +46,7 @@ const Navbar = () => {
                                     <Link className="nav-link me-3" to="/register">Home</Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className="btn btn-primary fs-5" to="/">Login</Link>
+                                    <Link className="btn btn-danger fs-5" to="/">Login</Link>
                                 </li>
                             </>
                         )}

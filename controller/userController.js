@@ -4,6 +4,8 @@ const List = require('../model/listSchema');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
+const path = require('path');
 // const resetPasstemp = require('../utils/Emailtemplate.jsx')
 
 // user registration
@@ -121,14 +123,7 @@ const resetPassword = async (req, res) => {
 const changePassword = async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
-        const token = req.headers.authorization?.split(' ')[1];
-
-        if (!token) {
-            return res.status(401).json({ message: "Unauthorized: No token provided" });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        const user = await User.findById(decoded.id);
+        const user = req.user;
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -150,10 +145,59 @@ const changePassword = async (req, res) => {
     }
 };
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, req.user._id + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
+
+// GET /profile
+const getProfile = async (req, res) => {
+    const user = req.user;
+    res.json({
+        user: {
+            name: user.name,
+            username: user.username,
+            email: user.email,
+            age: user.age,
+            dateOfBirth: user.dateOfBirth,
+            profileImageUrl: user.profileImageUrl || null
+        }
+    });
+};
+
+// PUT /profile
+const updateProfile = async (req, res) => {
+    try {
+        const user = req.user;
+        const { name, age, dateOfBirth } = req.body;
+        if (name) user.name = name;
+        if (age) user.age = age;
+        if (dateOfBirth) user.dateOfBirth = dateOfBirth;
+        if (req.file) {
+            user.profileImageUrl = `/uploads/${req.file.filename}`;
+        }
+        // Defensive: Ensure username is never undefined or missing
+        if (!user.username) {
+            user.username = user.email.split('@')[0];
+        }
+        await user.save();
+        res.json({ message: 'Profile updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     forgotPassword,
     resetPassword,
-    changePassword
+    changePassword,
+    getProfile,
+    updateProfile
 };

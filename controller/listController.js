@@ -2,14 +2,12 @@
 const List = require('../model/listSchema');
 const User = require('../model/userSchema');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 //add list
 const addList = async (req, res) => {
     const { title, description, status } = req.body;
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decoded.id;
-
+    const userId = req.user._id;
     try {
         const newList = new List({
             title,
@@ -26,10 +24,7 @@ const addList = async (req, res) => {
 
 //get all lists
 const getAllLists = async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decoded.id;
-
+    const userId = req.user._id;
     try {
         const lists = await List.find({ user: userId });
         res.status(200).json({ lists });
@@ -40,10 +35,7 @@ const getAllLists = async (req, res) => {
 //get list by id
 const getListById = async (req, res) => {
     const { id } = req.params;
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decoded.id;
-
+    const userId = req.user._id;
     try {
         const list = await List.findOne({ _id: id, user: userId });
         if (!list) {
@@ -58,10 +50,7 @@ const getListById = async (req, res) => {
 const updateList = async (req, res) => {
     const { id } = req.params;
     const { title, description, status } = req.body;
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decoded.id;
-
+    const userId = req.user._id;
     try {
         const updatedList = await List.findOneAndUpdate(
             { _id: id, user: userId },
@@ -79,10 +68,7 @@ const updateList = async (req, res) => {
 //delete list
 const deleteList = async (req, res) => {
     const { id } = req.params;
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decoded.id;
-
+    const userId = req.user._id;
     try {
         const deletedList = await List.findOneAndDelete({ _id: id, user: userId });
         if (!deletedList) {
@@ -94,12 +80,13 @@ const deleteList = async (req, res) => {
     }
 };
 
-//get list by user id
+//get list by user id (aggregation)
 const getListByUserId = async (req, res) => {
-    const { userId } = req.params;
-
+    const userId = req.params.userId;
     try {
-        const lists = await List.find({ user: userId });
+        const lists = await List.aggregate([
+            { $match: { user: mongoose.Types.ObjectId(userId) } }
+        ]);
         if (!lists) {
             return res.status(404).json({ message: 'No lists found for this user' });
         }
@@ -111,9 +98,7 @@ const getListByUserId = async (req, res) => {
 
 //search lists
 const searchLists = async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decoded.id;
+    const userId = req.user._id;
 
     try {
         const { searchTerm } = req.query;
@@ -142,9 +127,7 @@ const searchLists = async (req, res) => {
 
 //filter lists
 const filterLists = async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decoded.id;
+    const userId = req.user._id;
 
     try {
         const { status, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
@@ -179,10 +162,7 @@ const filterLists = async (req, res) => {
 
 // Unified search, filter, and pagination endpoint
 const getTodos = async (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const userId = decoded.id;
-
+    const userId = req.user._id;
     try {
         const { searchTerm = '', status, sortBy = 'createdAt', sortOrder = 'desc', page = 1, limit = 10 } = req.query;
         const query = { user: userId };

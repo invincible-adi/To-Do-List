@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
+import { FaEnvelope } from 'react-icons/fa';
 
 // Validation schema with Yup
 const schema = yup.object().shape({
@@ -27,21 +28,26 @@ function ForgotPassword() {
     };
 
     return (
-        <div className="container d-flex align-items-center justify-content-center mt-4">
-            <div className="card p-4 shadow-lg" style={{ width: '50%' }}>
+        <div className="container py-4">
+            <div className="card p-4 shadow-lg mx-auto card-gradient blur-background" style={{ maxWidth: 400 }}>
                 <h2 className="mb-4 text-primary text-center">Forgot Password</h2>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="mb-3">
-                        <input
-                            className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                            type="email"
-                            {...register("email")}
-                            placeholder="Enter your email"
-                            required
-                        />
-                        {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
+                        <label htmlFor="email" className="form-label dark-theme-label">Email address</label>
+                        <div className="input-group">
+                            <span className="input-group-text"><FaEnvelope /></span>
+                            <input
+                                id="email"
+                                className={`form-control ${errors.email ? 'is-invalid' : ''} dark-theme-input`}
+                                type="email"
+                                {...register("email")}
+                                placeholder="Enter your email"
+                                required
+                            />
+                        </div>
+                        {errors.email && <div className="invalid-feedback d-block">{errors.email.message}</div>}
                     </div>
-                    <button type="submit" className="btn btn-primary w-100">Send Reset Link</button>
+                    <button type="submit" className="btn btn-gradient w-100">Send Reset Link</button>
                 </form>
             </div>
         </div>

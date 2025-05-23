@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
+import { FaLock } from 'react-icons/fa';
 
 // Validation schema with Yup
 const schema = yup.object().shape({
@@ -33,31 +34,41 @@ function ChangePassword() {
   };
 
   return (
-    <div className="container d-flex align-items-center justify-content-center mt-5">
-      <div className="card p-4 shadow-lg" style={{ width: '50%' }}>
+    <div className="container py-4">
+      <div className="card p-4 shadow-lg mx-auto card-gradient blur-background" style={{ maxWidth: 400 }}>
         <h2 className="mb-4 text-primary text-center">Change Password</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-3">
-            <input
-              className={`form-control ${errors.oldPassword ? 'is-invalid' : ''}`}
-              type="password"
-              {...register("oldPassword")}
-              placeholder="Enter old password"
-              required
-            />
-            {errors.oldPassword && <div className="invalid-feedback">{errors.oldPassword.message}</div>}
+            <label className="form-label dark-theme-label">Old Password</label>
+            <div className="input-group">
+              <span className="input-group-text"><FaLock /></span>
+              <input
+                id="oldPassword"
+                className={`form-control ${errors.oldPassword ? 'is-invalid' : ''} dark-theme-input`}
+                type="password"
+                {...register("oldPassword")}
+                placeholder="Enter old password"
+                required
+              />
+            </div>
+            {errors.oldPassword && <div className="invalid-feedback d-block">{errors.oldPassword.message}</div>}
           </div>
           <div className="mb-3">
-            <input
-              className={`form-control ${errors.newPassword ? 'is-invalid' : ''}`}
-              type="password"
-              {...register("newPassword")}
-              placeholder="Enter new password"
-              required
-            />
-            {errors.newPassword && <div className="invalid-feedback">{errors.newPassword.message}</div>}
+            <label className="form-label dark-theme-label">New Password</label>
+            <div className="input-group">
+              <span className="input-group-text"><FaLock /></span>
+              <input
+                id="newPassword"
+                className={`form-control ${errors.newPassword ? 'is-invalid' : ''} dark-theme-input`}
+                type="password"
+                {...register("newPassword")}
+                placeholder="Enter new password"
+                required
+              />
+            </div>
+            {errors.newPassword && <div className="invalid-feedback d-block">{errors.newPassword.message}</div>}
           </div>
-          <button type="submit" className="btn btn-primary w-100">Change Password</button>
+          <button type="submit" className="btn btn-gradient w-100">Change Password</button>
         </form>
       </div>
     </div>

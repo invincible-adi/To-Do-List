@@ -13,10 +13,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    lists: [{
-        type: mongoose.Schema.Types.ObjectId,
-        reference: 'List'
-    }],
     username: {
         type: String,
         required: true,
@@ -29,6 +25,10 @@ const userSchema = new mongoose.Schema({
     dateOfBirth: {
         type: Date,
         required: true
+    },
+    profileImageUrl: {
+        type: String,
+        default: null
     },
 });
 const User = mongoose.model('User', userSchema);

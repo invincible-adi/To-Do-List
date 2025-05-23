@@ -1,0 +1,181 @@
+/* Add a subtle gradient background to the body or main app container */
+body,
+#root {
+    /* Dark background gradient */
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    /* Ensure the gradient covers the full viewport height */
+    /* Add an overlay for readability */
+}
+
+/* Define some dark theme variables */
+:root {
+    --dark-primary: #e94560;
+    --dark-secondary: #533483;
+    --dark-text: #e0e0e0;
+    --dark-card-bg: rgba(26, 33, 46, 0.8);
+    /* Semi-transparent dark card background */
+    --dark-input-bg: #333;
+    --dark-input-text: var(--dark-text);
+    --dark-border-color: #555;
+    --dark-error-color: #ff6b6b;
+    /* A bright red for errors */
+}
+
+body {
+    color: var(--dark-text);
+}
+
+/* Example gradient for buttons */
+.btn-gradient {
+    background: linear-gradient(90deg, var(--dark-primary), var(--dark-secondary));
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add a subtle shadow */
+}
+
+.btn-gradient:hover {
+    background: linear-gradient(90deg, var(--dark-secondary), var(--dark-primary));
+    /* Subtle variation on hover */
+}
+
+/* Example gradient for cards */
+.card-gradient {
+    background: var(--dark-card-bg);
+}
+
+/* Example gradient for navbar */
+.navbar-gradient {
+    background: linear-gradient(to right, var(--dark-secondary), #1a1a2e);
+    color: white;
+    /* Ensure text is readable */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add a subtle shadow */
+}
+
+.navbar-gradient .nav-link {
+    color: white;
+    /* Ensure nav links are readable */
+}
+
+.navbar-gradient .navbar-brand {
+    color: var(--dark-primary) !important;
+    /* Ensure brand is readable */
+}
+
+/* Update Bootstrap text-primary for dark theme */
+.text-primary {
+    color: var(--dark-primary) !important;
+}
+
+/* CSS class for blur effect */
+.blur-background {
+    backdrop-filter: blur(8px);
+    /* Adjust the blur amount as needed */
+    /* For older browsers that don't support backdrop-filter */
+    /* background-color: rgba(255, 255, 255, 0.1); */
+    /* Optional: Add a slight transparent background fallback */
+}
+
+/* Dark theme input styles */
+.dark-theme-input {
+    background-color: var(--dark-input-bg);
+    color: var(--dark-input-text);
+    border-color: var(--dark-border-color);
+}
+
+.dark-theme-input::placeholder {
+    color: rgba(224, 224, 224, 0.7);
+    /* Lighter placeholder text */
+}
+
+.dark-theme-input:focus {
+    background-color: #444;
+    border-color: var(--dark-primary);
+    box-shadow: 0 0 0 0.25rem rgba(233, 69, 96, 0.25);
+    /* Focus glow using primary color */
+}
+
+/* Update text-danger for dark theme */
+.text-danger {
+    color: var(--dark-error-color) !important;
+}
+
+/* Dark theme label styling */
+.dark-theme-label {
+    color: var(--dark-primary) !important;
+    /* Use primary color for highlighting */
+    font-weight: bold;
+}
+
+/* Dark theme input group text styling */
+.input-group-text {
+    background-color: var(--dark-secondary) !important;
+    color: var(--dark-text) !important;
+    border-color: var(--dark-border-color) !important;
+}
+
+/* Add specific styles for dark theme secondary buttons */
+.dark-theme-secondary-button {
+    background-color: #6c757d;
+    /* Default Bootstrap secondary */
+    color: white;
+    border-color: #6c757d;
+}
+
+/* Add specific styles for dark theme warning buttons */
+.dark-theme-warning-button {
+    background-color: #ffc107;
+    /* Default Bootstrap warning */
+    color: #212529;
+    /* Dark text for contrast */
+    border-color: #ffc107;
+}
+
+.dark-theme-warning-button:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+/* Add specific styles for dark theme danger buttons */
+.dark-theme-danger-button {
+    background-color: #dc3545;
+    /* Default Bootstrap danger */
+    color: white;
+    border-color: #dc3545;
+}
+
+.dark-theme-danger-button:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Style for the close button in dark theme modals */
+.dark-theme-close-button {
+    filter: invert(1) brightness(2);
+    /* Make the close button visible on dark backgrounds */
+}
+
+/* Dark theme alert styling */
+.alert-success {
+    background-color: #1e3a8a;
+    /* Darker blue */
+    color: #93c5fd;
+    /* Lighter text */
+    border-color: #1e3a8a;
+}
+
+.alert-danger {
+    background-color: #7f1d1d;
+    /* Darker red */
+    color: #fca5a5;
+    /* Lighter text */
+    border-color: #7f1d1d;
+}
+
+/* Dark theme secondary text styling */
+.text-secondary {
+    color: var(--dark-text) !important;
+    /* Use light grey for secondary text */
+}
