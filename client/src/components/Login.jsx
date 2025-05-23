@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -24,7 +24,7 @@ function Login() {
     // Handle form submission
     const onSubmit = async (data) => {
         try {
-            const res = await axios.post('http://localhost:5000/login', data);
+            const res = await axiosInstance.post('/login', data);
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('userid', res.data.user.id);
 

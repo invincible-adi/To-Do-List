@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import withAuth from '../auth/withAuth';
 import Swal from 'sweetalert2';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { ClipLoader } from 'react-spinners';
 
 const taskSchema = yup.object().shape({
     title: yup.string().required('Task Name is required'),
@@ -36,38 +37,29 @@ function Dashboard() {
     const fetchTasks = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
-            if (!token) {
-                Swal.fire({ icon: 'error', title: 'Authentication Error', text: 'User not authenticated' });
-                return;
-            }
             const params = {
                 searchTerm,
                 status: filterStatus,
                 page,
                 limit
             };
-            const res = await axios.get('http://localhost:5000/todos', {
-                headers: { Authorization: `Bearer ${token}` },
-                params
-            });
-            setTasks(res.data.lists);
-            setTotalPages(res.data.totalPages);
-            setLimit(res.data.limit || 5);
-            setTotal(res.data.total || 0);
+            const res = await axiosInstance.get('/todos', { params });
+            setTimeout(() => {
+                setTasks(res.data.lists);
+                setTotalPages(res.data.totalPages);
+                setLimit(res.data.limit || 5);
+                setTotal(res.data.total || 0);
+                setLoading(false);
+            }, 1000);
         } catch (error) {
             Swal.fire({ icon: 'error', title: 'Error fetching tasks', text: error.response?.data?.message || 'Failed to retrieve tasks' });
-        } finally {
             setLoading(false);
         }
     };
 
     const createTask = async (data) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/addlist', data, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await axiosInstance.post('/addlist', data);
 
             Swal.fire({ icon: 'success', title: 'Task added successfully', timer: 1200 });
             reset();
@@ -80,10 +72,7 @@ function Dashboard() {
     // Delete Task
     const deleteTask = async (id) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/deletelist/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await axiosInstance.delete(`/deletelist/${id}`);
 
             Swal.fire({ icon: 'success', title: 'Task deleted successfully', timer: 1200 });
             fetchTasks();
@@ -96,10 +85,7 @@ function Dashboard() {
     const updateTask = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/updatelist/${selectedTask._id}`, selectedTask, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await axiosInstance.put(`/updatelist/${selectedTask._id}`, selectedTask);
 
             Swal.fire({ icon: 'success', title: 'Task updated successfully', timer: 1200 });
             setSelectedTask(null);
@@ -200,7 +186,9 @@ function Dashboard() {
                 </div>
                 <ul className="list-group">
                     {loading ? (
-                        <li className="list-group-item text-center dark-theme-text blur-background rounded">Loading...</li>
+                        <li className="list-group-item text-center dark-theme-text blur-background rounded">
+                            <ClipLoader color="var(--dark-primary)" loading={loading} size={35} />
+                        </li>
                     ) : tasks.length === 0 ? (
                         <li className="list-group-item text-muted text-center blur-background rounded">No tasks found!</li>
                     ) : tasks.map((task) => (

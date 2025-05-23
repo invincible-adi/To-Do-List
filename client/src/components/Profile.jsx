@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import Swal from 'sweetalert2';
 import withAuth from '../auth/withAuth';
 import Modal from 'react-bootstrap/Modal';
@@ -22,10 +22,7 @@ function Profile() {
 
     const fetchProfile = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/profile', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await axiosInstance.get('/profile');
             setUser(res.data.user);
             setForm({
                 name: res.data.user.name || '',
@@ -64,14 +61,13 @@ function Profile() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
             const formData = new FormData();
             formData.append('name', form.name);
             formData.append('age', form.age);
             formData.append('dateOfBirth', form.dateOfBirth);
             if (form.profileImage) formData.append('profileImage', form.profileImage);
-            await axios.put('http://localhost:5000/profile', formData, {
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+            await axiosInstance.put('/profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             Swal.fire({ icon: 'success', title: 'Profile updated successfully', timer: 1200 });
             setEditMode(false);
@@ -85,10 +81,7 @@ function Profile() {
         e.preventDefault();
         setChangingPassword(true);
         try {
-            const token = localStorage.getItem('token');
-            await axios.put('http://localhost:5000/changepassword', { oldPassword, newPassword }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await axiosInstance.put('/changepassword', { oldPassword, newPassword });
             Swal.fire({ icon: 'success', title: 'Password changed successfully', timer: 1500 });
             setShowPasswordModal(false);
             setOldPassword('');

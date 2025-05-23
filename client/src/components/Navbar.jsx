@@ -1,9 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const isAuthenticated = localStorage.getItem('token');
+    const [profileImageUrl, setProfileImageUrl] = useState(null);
+    const [loadingProfileImage, setLoadingProfileImage] = useState(false);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            const fetchProfileImage = async () => {
+                setLoadingProfileImage(true);
+                try {
+                    const res = await axiosInstance.get('/profile');
+                    // Prepend the base URL as seen in Profile.jsx
+                    setProfileImageUrl(`http://localhost:5000${res.data.user.profileImageUrl || '/default-profile.png'}`);
+                } catch (error) {
+                    console.error('Failed to fetch profile image:', error);
+                    setProfileImageUrl('/default-profile.png'); // Use default image on error
+                } finally {
+                    setLoadingProfileImage(false);
+                }
+            };
+            fetchProfileImage();
+        } else {
+            setProfileImageUrl(null); // Clear image when not authenticated
+        }
+    }, [isAuthenticated]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -33,9 +57,29 @@ const Navbar = () => {
                                 <li className="nav-item">
                                     <Link className="nav-link me-3" to={`/dashboard`}>Dashboard</Link>
                                 </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link me-3" to={`/profile`}>Profile</Link>
-                                </li>
+                                {profileImageUrl && (
+                                    <li className="nav-item me-3 d-flex align-items-center" style={{ cursor: 'pointer' }}>
+                                        {loadingProfileImage ? (
+                                            // Optional: Add a simple loading indicator if desired
+                                            <div style={{ width: 35, height: 35, borderRadius: '50%', backgroundColor: '#555' }}></div>
+                                        ) : (
+                                            <Link to="/profile">
+                                                <img
+                                                    src={profileImageUrl}
+                                                    alt="Profile"
+                                                    style={{
+                                                        width: 35,
+                                                        height: 35,
+                                                        borderRadius: '50%',
+                                                        objectFit: 'cover',
+                                                        border: '1px solid white'
+                                                    }}
+                                                />
+                                            </Link>
+                                        )}
+                                    </li>
+                                )}
+
                                 <li className="nav-item">
                                     <button className="btn btn-danger mt-1" onClick={handleLogout}>Logout</button>
                                 </li>

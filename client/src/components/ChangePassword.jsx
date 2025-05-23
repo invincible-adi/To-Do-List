@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -13,19 +13,15 @@ const schema = yup.object().shape({
 });
 
 function ChangePassword() {
-  const token = localStorage.getItem('token');
-
   // Hook form setup
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: yupResolver(schema),
   });
 
   // Handle form submission
   const onSubmit = async (data) => {
     try {
-      await axios.put('http://localhost:5000/changepassword', data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axiosInstance.put('/changepassword', data);
       Swal.fire({ icon: 'success', title: 'Password changed successfully', showConfirmButton: false, timer: 2000 });
       reset()
     } catch (err) {

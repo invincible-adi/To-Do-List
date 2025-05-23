@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -29,7 +29,7 @@ function ResetPassword() {
             setErrors({});
 
             // const token = localStorage.getItem('token');
-            const reset = await axios.put(`http://localhost:5000/resetpassword`, { token, password });
+            const reset = await axiosInstance.put(`/resetpassword`, { token, password });
 
             console.log(reset);
             Swal.fire({ icon: 'success', title: 'Password reset successful', showConfirmButton: false, timer: 1500 });

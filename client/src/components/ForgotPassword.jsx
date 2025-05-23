@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -20,7 +20,7 @@ function ForgotPassword() {
     // Handle form submission
     const onSubmit = async (data) => {
         try {
-            await axios.post('http://localhost:5000/forgotpassword', data);
+            await axiosInstance.post('/forgotpassword', data);
             Swal.fire({ icon: 'success', title: 'Check your email for reset instructions', showConfirmButton: false, timer: 2000 });
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Failed to send reset link', text: err.response?.data?.message || 'Failed to send reset link' });
