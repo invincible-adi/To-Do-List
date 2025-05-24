@@ -3,9 +3,22 @@ const List = require('../model/listSchema');
 const User = require('../model/userSchema');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const { body, param, query, validationResult } = require('express-validator');
 
 //add list
+const addListValidation = [
+    body('title').trim().notEmpty().withMessage('Task title is required'),
+    body('description').trim().notEmpty().withMessage('Task description is required'),
+    body('status').isIn(['Pending', 'Completed']).withMessage('Invalid task status'),
+];
+
 const addList = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { title, description, status } = req.body;
     const userId = req.user._id;
     try {
@@ -47,7 +60,20 @@ const getListById = async (req, res) => {
     }
 };
 //update list
+const updateListValidation = [
+    param('id').isMongoId().withMessage('Invalid task ID format'),
+    body('title').optional().trim().notEmpty().withMessage('Task title cannot be empty'),
+    body('description').optional().trim().notEmpty().withMessage('Task description cannot be empty'),
+    body('status').optional().isIn(['Pending', 'Completed']).withMessage('Invalid task status'),
+];
+
 const updateList = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { id } = req.params;
     const { title, description, status } = req.body;
     const userId = req.user._id;
@@ -66,7 +92,17 @@ const updateList = async (req, res) => {
     }
 };
 //delete list
+const deleteListValidation = [
+    param('id').isMongoId().withMessage('Invalid task ID format'),
+];
+
 const deleteList = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { id } = req.params;
     const userId = req.user._id;
     try {
@@ -202,4 +238,7 @@ module.exports = {
     searchLists,
     filterLists,
     getTodos,
+    addListValidation,
+    updateListValidation,
+    deleteListValidation
 };

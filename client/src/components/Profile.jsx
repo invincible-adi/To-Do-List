@@ -3,8 +3,9 @@ import axiosInstance from '../api/axiosInstance';
 import Swal from 'sweetalert2';
 import withAuth from '../auth/withAuth';
 import Modal from 'react-bootstrap/Modal';
-import { FaUser, FaEnvelope, FaBirthdayCake, FaCalendarAlt, FaEdit, FaLock } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaBirthdayCake, FaCalendarAlt, FaEdit, FaLock, FaUserCircle } from 'react-icons/fa';
 import { BiImageAdd } from 'react-icons/bi';
+import { useAuth } from '../context/AuthContext';
 
 function Profile() {
     const [user, setUser] = useState(null);
@@ -15,6 +16,7 @@ function Profile() {
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [changingPassword, setChangingPassword] = useState(false);
+    const { triggerProfileRefresh } = useAuth();
 
     useEffect(() => {
         fetchProfile();
@@ -72,6 +74,7 @@ function Profile() {
             Swal.fire({ icon: 'success', title: 'Profile updated successfully', timer: 1200 });
             setEditMode(false);
             fetchProfile();
+            triggerProfileRefresh();
         } catch (error) {
             Swal.fire({ icon: 'error', title: 'Update failed', text: error.response?.data?.message || 'Failed to update profile' });
         }
@@ -100,11 +103,15 @@ function Profile() {
             <div className="card p-4 shadow-lg card-gradient blur-background">
                 <h2 className="mb-4 text-primary text-center">Profile</h2>
                 <div className="text-center mb-3">
-                    <img
-                        src={preview ? `http://localhost:5000${preview}` : '/default-profile.png'}
-                        alt="Profile"
-                        style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--dark-border-color)' }}
-                    />
+                    {preview ? (
+                        <img
+                            src={`http://localhost:5000${preview}`}
+                            alt="Profile"
+                            style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--dark-border-color)' }}
+                        />
+                    ) : (
+                        <FaUserCircle size={120} style={{ color: 'var(--dark-text)' }} />
+                    )}
                 </div>
                 {!editMode ? (
                     <>

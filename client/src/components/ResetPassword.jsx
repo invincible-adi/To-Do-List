@@ -6,7 +6,13 @@ import Swal from 'sweetalert2';
 import { FaLock } from 'react-icons/fa';
 
 const schema = yup.object().shape({
-    password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
+    password: yup.string()
+        .min(8, 'Password must be at least 8 characters')
+        .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+        .matches(/[0-9]/, 'Password must contain at least one number')
+        .matches(/[^A-Za-z0-9]/, 'Password must contain at least one special character')
+        .required('New password is required'),
 });
 
 function ResetPassword() {
@@ -18,11 +24,6 @@ function ResetPassword() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!password) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Password is required' });
-            return;
-        }
 
         try {
             await schema.validate({ password }, { abortEarly: false });

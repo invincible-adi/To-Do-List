@@ -8,8 +8,14 @@ import * as yup from 'yup';
 import { ClipLoader } from 'react-spinners';
 
 const taskSchema = yup.object().shape({
-    title: yup.string().required('Task Name is required'),
-    description: yup.string().required('Task Description is required'),
+    title: yup.string()
+        .required('Task Name is required')
+        .min(3, 'Task name must be at least 3 characters')
+        .max(100, 'Task name cannot exceed 100 characters'),
+    description: yup.string()
+        .required('Task Description is required')
+        .min(5, 'Task description must be at least 5 characters')
+        .max(500, 'Task description cannot exceed 500 characters'),
     status: yup.string().oneOf(['Pending', 'Completed']).required('Status is required'),
 });
 

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
+import { useAuth } from '../context/AuthContext';
+import { FaUserCircle } from 'react-icons/fa';
 
 const Navbar = () => {
     const navigate = useNavigate();
-    const isAuthenticated = localStorage.getItem('token');
+    const { isAuthenticated, logout, profileUpdated } = useAuth();
     const [profileImageUrl, setProfileImageUrl] = useState(null);
     const [loadingProfileImage, setLoadingProfileImage] = useState(false);
+    const [hasProfileImage, setHasProfileImage] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -14,26 +17,28 @@ const Navbar = () => {
                 setLoadingProfileImage(true);
                 try {
                     const res = await axiosInstance.get('/profile');
-                    // Prepend the base URL as seen in Profile.jsx
-                    setProfileImageUrl(`http://localhost:5000${res.data.user.profileImageUrl || '/default-profile.png'}`);
+                    const imageUrl = res.data.user.profileImageUrl;
+                    if (imageUrl) {
+                        setProfileImageUrl(`http://localhost:5000${imageUrl}`);
+                        setHasProfileImage(true);
+                    } else {
+                        setProfileImageUrl(null);
+                        setHasProfileImage(false);
+                    }
                 } catch (error) {
                     console.error('Failed to fetch profile image:', error);
-                    setProfileImageUrl('/default-profile.png'); // Use default image on error
+                    setProfileImageUrl(null);
+                    setHasProfileImage(false);
                 } finally {
                     setLoadingProfileImage(false);
                 }
             };
             fetchProfileImage();
         } else {
-            setProfileImageUrl(null); // Clear image when not authenticated
+            setProfileImageUrl(null);
+            setHasProfileImage(false);
         }
-    }, [isAuthenticated]);
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userid');
-        navigate('/');
-    };
+    }, [isAuthenticated, profileUpdated]);
 
     return (
         <nav className="navbar navbar-expand-lg navbar-gradient">
@@ -57,13 +62,14 @@ const Navbar = () => {
                                 <li className="nav-item">
                                     <Link className="nav-link me-3" to={`/dashboard`}>Dashboard</Link>
                                 </li>
-                                {profileImageUrl && (
+                                {loadingProfileImage ? (
+                                    <li className="nav-item me-3 d-flex align-items-center">
+                                        <div style={{ width: 35, height: 35, borderRadius: '50%', backgroundColor: '#555' }}></div>
+                                    </li>
+                                ) : (
                                     <li className="nav-item me-3 d-flex align-items-center" style={{ cursor: 'pointer' }}>
-                                        {loadingProfileImage ? (
-                                            // Optional: Add a simple loading indicator if desired
-                                            <div style={{ width: 35, height: 35, borderRadius: '50%', backgroundColor: '#555' }}></div>
-                                        ) : (
-                                            <Link to="/profile">
+                                        <Link to="/profile" className="nav-link p-0 d-flex align-items-center">
+                                            {hasProfileImage && profileImageUrl ? (
                                                 <img
                                                     src={profileImageUrl}
                                                     alt="Profile"
@@ -75,13 +81,14 @@ const Navbar = () => {
                                                         border: '1px solid white'
                                                     }}
                                                 />
-                                            </Link>
-                                        )}
+                                            ) : (
+                                                <FaUserCircle size={30} />
+                                            )}
+                                        </Link>
                                     </li>
                                 )}
-
                                 <li className="nav-item">
-                                    <button className="btn btn-danger mt-1" onClick={handleLogout}>Logout</button>
+                                    <button className="btn btn-danger mt-1" onClick={logout}>Logout</button>
                                 </li>
                             </>
                         ) : (

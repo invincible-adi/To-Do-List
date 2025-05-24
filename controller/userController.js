@@ -6,22 +6,47 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const path = require('path');
+const { body, validationResult } = require('express-validator');
 // const resetPasstemp = require('../utils/Emailtemplate.jsx')
 
 // user registration
-const registerUser = async (req, res) => {
-    const { name, email, password, age, dateOfBirth } = req.body;
-    try {
-        const existingUser = await User.findOne({ email });
+const registerUserValidation = [
+    body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 12 }).withMessage('Name cannot exceed 12 characters'),
+    body('email').isEmail().withMessage('Invalid email format').normalizeEmail().custom(async (value) => {
+        const existingUser = await User.findOne({ email: value });
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
+            throw new Error('User already exists');
         }
+        return true;
+    }),
+    body('password')
+        .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+        .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
+        .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
+        .matches(/[0-9]/).withMessage('Password must contain at least one number')
+        .matches(/[^A-Za-z0-9]/).withMessage('Password must contain at least one special character'),
+    body('age').isInt({ gt: 0 }).withMessage('Age must be a positive number'),
+    body('dateOfBirth').isDate().withMessage('Invalid date of birth format'),
+];
+
+const registerUser = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { name, email, password, age, dateOfBirth } = req.body;
+    // The existing user check is now in the custom validator
+    // const existingUser = await User.findOne({ email });
+    // if (existingUser) {
+    //     return res.status(400).json({ message: 'User already exists' });
+    // }
+
+    try {
         // Auto-generate username from email
         const username = email.split('@')[0];
-        // Password validation: minimum 8 characters
-        if (!password || password.length < 8) {
-            return res.status(400).json({ message: 'Password must be at least 8 characters' });
-        }
+        // Password validation: minimum 8 characters (now handled by express-validator)
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             name,
@@ -40,7 +65,18 @@ const registerUser = async (req, res) => {
 };
 
 // user login
+const loginUserValidation = [
+    body('email').isEmail().withMessage('Invalid email format').normalizeEmail(),
+    body('password').notEmpty().withMessage('Password is required'),
+];
+
 const loginUser = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { email, password } = req.body;
     try {
         const user = await User.findOne({ email });
@@ -62,7 +98,17 @@ const loginUser = async (req, res) => {
 }
 
 //make controller for forgot password
+const forgotPasswordValidation = [
+    body('email').isEmail().withMessage('Invalid email format').normalizeEmail()
+];
+
 const forgotPassword = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { email } = req.body;
     try {
         const user = await User.findOne({ email });
@@ -94,12 +140,24 @@ const forgotPassword = async (req, res) => {
     }
 }
 
-const resetPassword = async (req, res) => {
-    const { token, password } = req.body;
+const resetPasswordValidation = [
+    body('token').notEmpty().withMessage('Token is required'),
+    body('password')
+        .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+        .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
+        .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
+        .matches(/[0-9]/).withMessage('Password must contain at least one number')
+        .matches(/[^A-Za-z0-9]/).withMessage('Password must contain at least one special character'),
+];
 
-    if (!password) {
-        return res.status(400).json({ message: "New password is required" });
+const resetPassword = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
     }
+
+    const { token, password } = req.body;
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
@@ -120,7 +178,23 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const changePasswordValidation = [
+    body('oldPassword').notEmpty().withMessage('Old password is required'),
+    body('newPassword')
+        .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+        .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
+        .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
+        .matches(/[0-9]/).withMessage('Password must contain at least one number')
+        .matches(/[^A-Za-z0-9]/).withMessage('Password must contain at least one special character'),
+];
+
 const changePassword = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { oldPassword, newPassword } = req.body;
         const user = req.user;
@@ -171,7 +245,20 @@ const getProfile = async (req, res) => {
 };
 
 // PUT /profile
+const updateProfileValidation = [
+    body('name').optional().trim().isLength({ max: 12 }).withMessage('Name cannot exceed 12 characters'),
+    body('age').optional().isInt({ gt: 0 }).withMessage('Age must be a positive number'),
+    body('dateOfBirth').optional().isDate().withMessage('Invalid date of birth format'),
+    // No direct validation for profileImage here, as it's handled by Multer
+];
+
 const updateProfile = async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const user = req.user;
         const { name, age, dateOfBirth } = req.body;
@@ -199,5 +286,11 @@ module.exports = {
     resetPassword,
     changePassword,
     getProfile,
-    updateProfile
+    updateProfile,
+    registerUserValidation,
+    loginUserValidation,
+    forgotPasswordValidation,
+    resetPasswordValidation,
+    changePasswordValidation,
+    updateProfileValidation
 };

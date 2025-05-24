@@ -7,18 +7,26 @@ import * as yup from 'yup';
 import Swal from 'sweetalert2';
 import { FaUser, FaEnvelope, FaLock, FaBirthdayCake } from 'react-icons/fa';
 import { FaCalendarAlt } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
 // Validation schema with Yup
 const schema = yup.object().shape({
     name: yup.string().required('Name is required').max(12),
     email: yup.string().email('Invalid email format').required('Email is required'),
-    password: yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
+    password: yup.string()
+        .min(8, 'Password must be at least 8 characters')
+        .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+        .matches(/[0-9]/, 'Password must contain at least one number')
+        .matches(/[^A-Za-z0-9]/, 'Password must contain at least one special character')
+        .required('Password is required'),
     age: yup.number().typeError('Age must be a number').required('Age is required').min(1, 'Age must be at least 1'),
     dateOfBirth: yup.date().typeError('Date of Birth is required').required('Date of Birth is required'),
 });
 
 function Register() {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     // React Hook Form setup
     const { register, handleSubmit, formState: { errors } } = useForm({
@@ -28,9 +36,17 @@ function Register() {
     // Handle form submission
     const onSubmit = async (data) => {
         try {
+            // First, register the user
             await axiosInstance.post('/register', data);
             Swal.fire({ icon: 'success', title: 'Registration successful', showConfirmButton: false, timer: 1500 });
-            navigate('/');
+
+            // Then, automatically log in the user
+            const loginRes = await axiosInstance.post('/login', { email: data.email, password: data.password });
+            localStorage.setItem('token', loginRes.data.token);
+            login(loginRes.data.token, loginRes.data.user.id);
+            Swal.fire({ icon: 'success', title: 'Login successful', showConfirmButton: false, timer: 1000 }); // Shorter timer for auto-login feedback
+            navigate('/dashboard');
+
         } catch (err) {
             console.log(err);
             Swal.fire({ icon: 'error', title: 'Registration failed', text: err.response?.data?.message || 'Registration failed' });

@@ -6,6 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
 // Validation schema with Yup
 const schema = yup.object().shape({
@@ -15,6 +16,7 @@ const schema = yup.object().shape({
 
 function Login() {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     // React Hook Form setup
     const { register, handleSubmit, formState: { errors } } = useForm({
@@ -26,7 +28,7 @@ function Login() {
         try {
             const res = await axiosInstance.post('/login', data);
             localStorage.setItem('token', res.data.token);
-            localStorage.setItem('userid', res.data.user.id);
+            login(res.data.token, res.data.user.id);
 
             Swal.fire({ icon: 'success', title: 'Login successful', showConfirmButton: false, timer: 1500 });
             navigate(`/dashboard`);
